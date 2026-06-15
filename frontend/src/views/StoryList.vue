@@ -86,6 +86,13 @@
             </div>
             <div class="story-card-footer">
               <span class="time">更新于 {{ formatTime(s.updatedAt) }}</span>
+              <button
+                :class="['fav-btn', { 'favorited': isFavorite(s.id) }]"
+                @click.stop="handleToggleFavorite(s)"
+                :title="isFavorite(s.id) ? '取消收藏' : '收藏故事'"
+              >
+                {{ isFavorite(s.id) ? '❤️' : '🤍' }}
+              </button>
             </div>
           </router-link>
         </div>
@@ -138,7 +145,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../api.js'
-import { formatTime } from '../utils.js'
+import { formatTime, isFavorite, toggleFavorite } from '../utils.js'
 
 const router = useRouter()
 const stories = ref([])
@@ -198,6 +205,10 @@ async function handleCreate() {
   } finally {
     submitting.value = false
   }
+}
+
+function handleToggleFavorite(story) {
+  toggleFavorite(story)
 }
 
 onMounted(loadData)
@@ -346,9 +357,40 @@ onMounted(loadData)
   border-top: 1px solid var(--border);
 }
 
+.story-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .time {
   font-size: 12px;
   color: var(--text-light);
+}
+
+.fav-btn {
+  background: none;
+  border: none;
+  padding: 4px 8px;
+  font-size: 18px;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: all 0.2s;
+}
+
+.fav-btn:hover {
+  transform: scale(1.2);
+  background: var(--surface-alt);
+}
+
+.fav-btn.favorited {
+  animation: heartBeat 0.3s ease;
+}
+
+@keyframes heartBeat {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1); }
 }
 
 .modal-mask {

@@ -18,7 +18,16 @@
       <template v-else>
         <header class="story-header card">
           <div class="header-top">
-            <h1 class="story-title">{{ story.title }}</h1>
+            <div class="title-with-fav">
+              <h1 class="story-title">{{ story.title }}</h1>
+              <button
+                :class="['fav-btn-lg', { 'favorited': isFavorite(story.id) }]"
+                @click="handleToggleFavorite"
+                :title="isFavorite(story.id) ? '取消收藏' : '收藏故事'"
+              >
+                {{ isFavorite(story.id) ? '❤️ 已收藏' : '🤍 收藏' }}
+              </button>
+            </div>
             <span
               :class="['tag', story.locked ? 'tag-success' : 'tag-warning']"
             >
@@ -157,7 +166,7 @@
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import api from '../api.js'
-import { formatTime } from '../utils.js'
+import { formatTime, isFavorite, toggleFavorite } from '../utils.js'
 
 const props = defineProps({
   id: { type: String, required: true }
@@ -248,6 +257,12 @@ function scrollToTop() {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
+function handleToggleFavorite() {
+  if (story.value) {
+    toggleFavorite(story.value)
+  }
+}
+
 watch(() => route.params.id, loadStory)
 onMounted(loadStory)
 </script>
@@ -278,10 +293,45 @@ onMounted(loadStory)
   margin-bottom: 12px;
 }
 
+.title-with-fav {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
 .story-title {
   font-size: 24px;
   font-weight: 700;
   line-height: 1.3;
+}
+
+.fav-btn-lg {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  font-size: 14px;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  transition: all 0.2s;
+}
+
+.fav-btn-lg:hover {
+  background: var(--border);
+  transform: translateY(-1px);
+}
+
+.fav-btn-lg.favorited {
+  background: linear-gradient(135deg, rgba(236, 72, 153, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%);
+  border-color: var(--accent-light);
+  color: var(--accent);
+}
+
+.fav-btn-lg.favorited:hover {
+  background: linear-gradient(135deg, rgba(236, 72, 153, 0.15) 0%, rgba(99, 102, 241, 0.15) 100%);
 }
 
 .lock-reason {
